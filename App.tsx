@@ -90,7 +90,7 @@ const App: React.FC = () => {
           <i className="fa-solid fa-calculator text-2xl"></i>
         </div>
         <h1 className="text-2xl font-bold text-slate-800">Калькулятор Дилера</h1>
-        <p className="text-slate-500 mt-1">Версия 1.1 (PWA)</p>
+        <p className="text-slate-500 mt-1">Версия 1.2 (PWA)</p>
       </header>
 
       {/* Main Card */}
@@ -197,12 +197,24 @@ const App: React.FC = () => {
         <div className="bg-white/60 backdrop-blur-sm p-5 rounded-2xl border border-white text-xs text-slate-500 leading-relaxed shadow-sm">
           <h3 className="font-bold text-slate-700 mb-2 flex items-center gap-2">
             <i className="fa-solid fa-circle-info text-blue-500"></i>
-            Инфо
+            Как установить?
           </h3>
-          <ul className="space-y-1.5 list-disc pl-4">
-            <li>Приложение можно установить через кнопку "Установить на экран" или через меню браузера.</li>
-            <li>Округление всегда идет в большую сторону.</li>
-          </ul>
+          <div className="space-y-3">
+            <p>Если кнопки «Установить» нет:</p>
+            <ul className="space-y-2 list-none">
+              <li className="flex gap-2">
+                <span className="font-bold text-blue-600">iOS (iPhone):</span> 
+                Нажмите «Поделиться» (квадрат со стрелкой) → «На экран Домой».
+              </li>
+              <li className="flex gap-2">
+                <span className="font-bold text-blue-600">Android:</span> 
+                Нажмите на три точки в углу браузера → «Установить приложение».
+              </li>
+              <li className="flex gap-2 italic text-[10px] text-slate-400">
+                *Внутри Telegram установка может быть заблокирована. Откройте ссылку в обычном браузере (Safari/Chrome).
+              </li>
+            </ul>
+          </div>
         </div>
         <p className="text-center mt-6 opacity-30 text-[10px] uppercase tracking-widest">
           &copy; 2024 Dealer Pro Tool
