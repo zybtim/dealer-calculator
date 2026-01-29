@@ -1,11 +1,8 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { WIDTHS, HEIGHTS, PRICE_GRID } from './constants';
 import { CalculationResult } from './types';
 
-/**
- * Finds the nearest larger or equal value from a sorted array.
- */
 const findNearestCeil = (value: number, options: number[]): number | null => {
   const found = options.find((opt) => opt >= value);
   return found !== undefined ? found : null;
@@ -15,6 +12,33 @@ const App: React.FC = () => {
   const [widthInput, setWidthInput] = useState<string>('');
   const [heightInput, setHeightInput] = useState<string>('');
   const [result, setResult] = useState<CalculationResult | null>(null);
+  
+  // PWA logic
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallBtn, setShowInstallBtn] = useState(false);
+
+  useEffect(() => {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallBtn(true);
+    });
+
+    window.addEventListener('appinstalled', () => {
+      setShowInstallBtn(false);
+      setDeferredPrompt(null);
+    });
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setShowInstallBtn(false);
+    }
+    setDeferredPrompt(null);
+  };
 
   const calculatePrice = () => {
     const w = parseInt(widthInput, 10);
@@ -48,7 +72,6 @@ const App: React.FC = () => {
     });
   };
 
-  // Auto-calculate on input change
   useEffect(() => {
     calculatePrice();
   }, [widthInput, heightInput]);
@@ -67,13 +90,12 @@ const App: React.FC = () => {
           <i className="fa-solid fa-calculator text-2xl"></i>
         </div>
         <h1 className="text-2xl font-bold text-slate-800">Калькулятор Дилера</h1>
-        <p className="text-slate-500 mt-1">Введите размеры для расчета стоимости</p>
+        <p className="text-slate-500 mt-1">Версия 1.1 (PWA)</p>
       </header>
 
       {/* Main Card */}
       <main className="w-full max-w-md bg-white rounded-3xl shadow-xl shadow-slate-200 overflow-hidden border border-slate-100">
         <div className="p-6 sm:p-8 space-y-6">
-          {/* Inputs */}
           <div className="grid grid-cols-1 gap-6">
             <div>
               <label htmlFor="width" className="block text-sm font-semibold text-slate-700 mb-2">
@@ -112,7 +134,6 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          {/* Results Area */}
           <div className="mt-8">
             {result ? (
               <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -120,7 +141,7 @@ const App: React.FC = () => {
                   <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center">
                     <i className="fa-solid fa-triangle-exclamation text-amber-500 text-3xl mb-3"></i>
                     <p className="text-amber-800 font-medium">Размер вне таблицы</p>
-                    <p className="text-amber-600 text-sm mt-1">Пожалуйста, уточните цену у менеджера.</p>
+                    <p className="text-amber-600 text-sm mt-1">Уточните цену у менеджера.</p>
                   </div>
                 ) : (
                   <div className="bg-blue-600 rounded-2xl p-8 text-white text-center shadow-lg shadow-blue-200">
@@ -150,8 +171,7 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Action Bar */}
-        <div className="bg-slate-50 p-4 border-t border-slate-100 flex justify-center">
+        <div className="bg-slate-50 p-4 border-t border-slate-100 flex flex-col sm:flex-row gap-2 justify-center items-center">
           <button 
             onClick={handleClear}
             className="flex items-center gap-2 px-6 py-2 text-slate-500 hover:text-blue-600 font-medium transition-colors"
@@ -159,6 +179,16 @@ const App: React.FC = () => {
             <i className="fa-solid fa-rotate-left"></i>
             Очистить
           </button>
+          
+          {showInstallBtn && (
+            <button 
+              onClick={handleInstallClick}
+              className="flex items-center gap-2 px-6 py-2 bg-blue-100 text-blue-700 rounded-full font-bold hover:bg-blue-200 transition-all animate-pulse"
+            >
+              <i className="fa-solid fa-download"></i>
+              Установить на экран
+            </button>
+          )}
         </div>
       </main>
 
@@ -167,14 +197,11 @@ const App: React.FC = () => {
         <div className="bg-white/60 backdrop-blur-sm p-5 rounded-2xl border border-white text-xs text-slate-500 leading-relaxed shadow-sm">
           <h3 className="font-bold text-slate-700 mb-2 flex items-center gap-2">
             <i className="fa-solid fa-circle-info text-blue-500"></i>
-            Правила расчета
+            Инфо
           </h3>
           <ul className="space-y-1.5 list-disc pl-4">
-            <li>Цены указаны для дилеров.</li>
-            <li>При нестандартных размерах выполняется округление в большую сторону до ближайшего табличного значения.</li>
-            <li>Например: <span className="font-medium text-slate-700">491 → 500</span>, <span className="font-medium text-slate-700">1276 → 1300</span>.</li>
-            <li>Максимально допустимая ширина: <span className="font-medium text-slate-700">2000 мм</span>.</li>
-            <li>Максимально допустимая высота: <span className="font-medium text-slate-700">2000 мм</span>.</li>
+            <li>Приложение можно установить через кнопку "Установить на экран" или через меню браузера.</li>
+            <li>Округление всегда идет в большую сторону.</li>
           </ul>
         </div>
         <p className="text-center mt-6 opacity-30 text-[10px] uppercase tracking-widest">
